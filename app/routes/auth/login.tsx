@@ -1,5 +1,4 @@
-import {Home} from "../home/home";
-import type { Route } from "./home/+types/home";
+import type { Route } from "./+types/login";
    
 export function meta({}: Route.MetaArgs) {
   return [
@@ -8,6 +7,6 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function home() {
-  return <Home />;
+export default function login() {
+  return <div className="card-body"></div>;
 }
