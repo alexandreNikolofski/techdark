@@ -2,6 +2,7 @@
   "name": "soluhub",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@8.15.4",
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
