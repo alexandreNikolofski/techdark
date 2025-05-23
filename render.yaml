@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: soluhub
+    env: node
+    buildCommand: pnpm install && pnpm build
+    startCommand: pnpm start
+    rootDir: .
