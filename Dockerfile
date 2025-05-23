@@ -1,22 +1,32 @@
-FROM node:20-alpine AS development-dependencies-env
-COPY . /app
+# Etapa 1: Instala dependências de produção
+FROM node:20-alpine AS deps
 WORKDIR /app
-RUN npm ci
 
-FROM node:20-alpine AS production-dependencies-env
-COPY ./package.json package-lock.json /app/
+# Instala pnpm
+RUN corepack enable && corepack prepare pnpm@8.15.4 --activate
+
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --prod
+
+# Etapa 2: Build da aplicação
+FROM node:20-alpine AS builder
 WORKDIR /app
-RUN npm ci --omit=dev
 
-FROM node:20-alpine AS build-env
-COPY . /app/
-COPY --from=development-dependencies-env /app/node_modules /app/node_modules
-WORKDIR /app
-RUN npm run build
+RUN corepack enable && corepack prepare pnpm@8.15.4 --activate
 
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm build
+
+# Etapa 3: Servidor final
 FROM node:20-alpine
-COPY ./package.json package-lock.json /app/
-COPY --from=production-dependencies-env /app/node_modules /app/node_modules
-COPY --from=build-env /app/build /app/build
 WORKDIR /app
-CMD ["npm", "run", "start"]
+
+RUN corepack enable && corepack prepare pnpm@8.15.4 --activate
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/package.json ./
+
+# Usa react-router-serve como servidor
+CMD ["pnpm", "start"]
